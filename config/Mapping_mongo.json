@@ -1,0 +1,102 @@
+{
+  "version": "1.0",
+  "descripcion": "Mapeo de tablas PostgreSQL normalizadas hacia colecciones MongoDB",
+  "base_datos_origen": "biblioteca_db",
+  "base_datos_destino": "biblioteca_mongo",
+  "colecciones": {
+    "books": {
+      "tabla_origen": "Libros",
+      "descripcion": "Colección principal de libros con autor embebido",
+      "campos": {
+        "id_libro":          { "destino": "_pg_id",          "tipo": "int",    "incluir": false },
+        "titulo":            { "destino": "title",           "tipo": "string", "requerido": true },
+        "isbn":              { "destino": "isbn",            "tipo": "string", "requerido": false },
+        "anio_publicacion":  { "destino": "year",            "tipo": "int",    "requerido": false },
+        "editorial":         { "destino": "publisher",       "tipo": "string", "requerido": false },
+        "categoria":         { "destino": "category",        "tipo": "string", "requerido": false },
+        "descripcion":       { "destino": "description",     "tipo": "string", "requerido": false },
+        "id_autor":          { "destino": "author_id",       "tipo": "int",    "incluir": false }
+      },
+      "embedding": {
+        "descripcion": "Incluir datos del autor embebidos en el documento libro",
+        "tabla_join": "Autores",
+        "join_key": "id_autor",
+        "campo_destino": "author",
+        "campos_embebidos": {
+          "nombre": "name",
+          "nacionalidad": "nationality",
+          "fecha_nacimiento": "birth_date"
+        }
+      },
+      "indices": ["isbn", "category", "author.name"]
+    },
+    "users": {
+      "tabla_origen": "Usuarios",
+      "descripcion": "Colección de usuarios registrados de la biblioteca",
+      "campos": {
+        "id_usuario":  { "destino": "_pg_id",    "tipo": "int",    "incluir": false },
+        "nombre":      { "destino": "name",       "tipo": "string", "requerido": true },
+        "correo":      { "destino": "email",      "tipo": "string", "requerido": true },
+        "telefono":    { "destino": "phone",      "tipo": "string", "requerido": false },
+        "fecha_registro": { "destino": "registered_at", "tipo": "date", "requerido": false }
+      },
+      "indices": ["email"]
+    },
+    "loans": {
+      "tabla_origen": "Prestamos",
+      "descripcion": "Colección de préstamos activos e históricos",
+      "campos": {
+        "id_prestamo":   { "destino": "_pg_id",       "tipo": "int",    "incluir": false },
+        "id_usuario":    { "destino": "user_id",       "tipo": "int",    "incluir": false },
+        "id_libro":      { "destino": "book_id",       "tipo": "int",    "incluir": false },
+        "fecha_salida":  { "destino": "loan_date",     "tipo": "date",   "requerido": true },
+        "fecha_devolucion_esperada": { "destino": "due_date", "tipo": "date", "requerido": true },
+        "fecha_devolucion_real":     { "destino": "return_date", "tipo": "date", "requerido": false },
+        "estado":        { "destino": "status",        "tipo": "string", "requerido": true },
+        "multa":         { "destino": "fine_amount",   "tipo": "float",  "requerido": false }
+      },
+      "embedding": {
+        "descripcion": "Snapshot del usuario y libro al momento del préstamo",
+        "campos_usuario": {
+          "tabla_join": "Usuarios",
+          "join_key": "id_usuario",
+          "campo_destino": "user_snapshot",
+          "campos_embebidos": {
+            "nombre": "name",
+            "correo": "email"
+          }
+        },
+        "campos_libro": {
+          "tabla_join": "Libros",
+          "join_key": "id_libro",
+          "campo_destino": "book_snapshot",
+          "campos_embebidos": {
+            "titulo": "title",
+            "isbn": "isbn"
+          }
+        }
+      },
+      "indices": ["status", "loan_date", "user_id"]
+    },
+    "authors": {
+      "tabla_origen": "Autores",
+      "descripcion": "Colección de autores (referencia separada)",
+      "campos": {
+        "id_autor":         { "destino": "_pg_id",        "tipo": "int",    "incluir": false },
+        "nombre":           { "destino": "name",          "tipo": "string", "requerido": true },
+        "nacionalidad":     { "destino": "nationality",   "tipo": "string", "requerido": false },
+        "fecha_nacimiento": { "destino": "birth_date",    "tipo": "date",   "requerido": false }
+      },
+      "indices": ["name"]
+    }
+  },
+  "transformaciones_globales": {
+    "fechas_a_iso": true,
+    "nulos_como": null,
+    "agregar_metadata": {
+      "migrated_at": "timestamp_actual",
+      "source": "postgresql",
+      "schema_version": "1.0"
+    }
+  }
+}
