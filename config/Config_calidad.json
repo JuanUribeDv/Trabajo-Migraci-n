@@ -1,0 +1,117 @@
+{
+  "version": "1.0",
+  "proyecto": "Framework de Calidad - Biblioteca Universidad",
+  "reglas": {
+    "Biblioteca_Data": {
+      "titulo_libro": {
+        "tipo": "VARCHAR",
+        "requerido": true,
+        "longitud_min": 2,
+        "longitud_max": 255,
+        "prohibir_tipo": "TEXT",
+        "mensaje": "El título del libro no puede estar vacío y debe ser VARCHAR"
+      },
+      "autor_nombre": {
+        "tipo": "VARCHAR",
+        "requerido": true,
+        "longitud_min": 3,
+        "longitud_max": 255,
+        "mensaje": "El nombre del autor es obligatorio"
+      },
+      "categoria_y_descripcion": {
+        "violacion_1fn": true,
+        "mensaje": "Campo combinado detectado: viola 1FN, debe separarse en 'categoria' y 'descripcion'"
+      },
+      "fecha_publicacion": {
+        "tipo_correcto": "DATE",
+        "tipo_actual": "VARCHAR",
+        "formato": "YYYY-MM-DD",
+        "mensaje": "La fecha de publicación debe ser de tipo DATE, no VARCHAR"
+      },
+      "editorial_info": {
+        "tipo": "VARCHAR",
+        "requerido": false,
+        "longitud_max": 255
+      }
+    },
+    "Prestamos_Crudos": {
+      "id_prestamo": {
+        "requerido": true,
+        "unico": true,
+        "mensaje": "El id_prestamo debe ser único y no nulo (falta PRIMARY KEY)"
+      },
+      "correo_usuario": {
+        "requerido": true,
+        "debe_contener": "@",
+        "patron": "^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$",
+        "mensaje": "El correo debe contener '@' y tener formato válido"
+      },
+      "libros_prestados": {
+        "violacion_1fn": true,
+        "separador": ",",
+        "mensaje": "Lista separada por comas detectada: viola 1FN, debe ser una tabla relacional"
+      },
+      "estado_prestamo": {
+        "valores_permitidos": ["activo", "devuelto", "vencido", "renovado"],
+        "mensaje": "El estado del préstamo debe ser: activo, devuelto, vencido o renovado"
+      },
+      "fecha_salida": {
+        "tipo": "DATE",
+        "requerido": true,
+        "mensaje": "La fecha de salida es obligatoria y debe ser DATE"
+      }
+    },
+    "Inventario_Sedes": {
+      "sede_nombre": {
+        "requerido": true,
+        "longitud_min": 2,
+        "mensaje": "El nombre de la sede es obligatorio"
+      },
+      "cantidad_total": {
+        "tipo": "INT",
+        "min": 0,
+        "mensaje": "La cantidad total no puede ser negativa"
+      },
+      "libro_asociado": {
+        "redundancia": true,
+        "mensaje": "Campo redundante: debería ser una FK hacia la tabla Libros (id_libro)"
+      }
+    },
+    "Reseñas_Usuarios": {
+      "calificacion": {
+        "tipo_correcto": "INT",
+        "tipo_actual": "VARCHAR",
+        "min": 1,
+        "max": 5,
+        "mensaje": "La calificación debe ser numérica (INT) entre 1 y 5, no VARCHAR"
+      },
+      "comentario": {
+        "longitud_max": 1000,
+        "requerido": false
+      },
+      "usuario_id": {
+        "requerido": true,
+        "fk_faltante": true,
+        "mensaje": "usuario_id debería ser FK hacia tabla Usuarios"
+      }
+    }
+  },
+  "palabras_prohibidas_sql": [
+    "DROP TABLE",
+    "TRUNCATE",
+    "DELETE FROM",
+    "GRANT ALL",
+    "REVOKE"
+  ],
+  "tipos_prohibidos": {
+    "TEXT": "Usar VARCHAR con longitud definida en lugar de TEXT para campos cortos",
+    "VARCHAR_para_fechas": "Usar DATE o TIMESTAMP en lugar de VARCHAR para fechas",
+    "VARCHAR_para_numeros": "Usar INT o NUMERIC en lugar de VARCHAR para valores numéricos"
+  },
+  "umbrales_calidad": {
+    "porcentaje_minimo_valido": 80,
+    "max_errores_por_tabla": 50,
+    "nivel_alerta": "WARNING",
+    "nivel_critico": "ERROR"
+  }
+}
