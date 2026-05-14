@@ -21,7 +21,6 @@ def err(msg):  print(f"{ERR} {msg}"); global errores_criticos; errores_criticos 
 def warn(msg): print(f"{WRN}  {msg}")
 
 
-# ── 1. Dependencias Python ────────────────────────────────────
 print("\n[1] Dependencias Python")
 for lib in ["psycopg2", "pymongo", "faker", "dotenv"]:
     try:
@@ -31,7 +30,6 @@ for lib in ["psycopg2", "pymongo", "faker", "dotenv"]:
         err(f"{lib} NO instalado → pip install {lib.replace('dotenv','python-dotenv')}")
 
 
-# ── 2. Archivo .env ───────────────────────────────────────────
 print("\n[2] Archivo .env")
 env_path = os.path.join(BASE_DIR, ".env")
 if not os.path.exists(env_path):
@@ -50,7 +48,7 @@ else:
             err(f"{var} no definida en .env")
 
 
-# ── 3. Archivos del proyecto ──────────────────────────────────
+
 print("\n[3] Archivos del proyecto")
 archivos_requeridos = [
     "config/config_calidad.json",
@@ -67,7 +65,7 @@ for rel in archivos_requeridos:
     else:
         err(f"{rel} NO EXISTE")
 
-# JSONs válidos
+
 print("\n[4] Validez de archivos JSON")
 for rel in ["config/config_calidad.json", "config/mapping_mongo.json"]:
     full = os.path.join(BASE_DIR, rel)
@@ -79,7 +77,7 @@ for rel in ["config/config_calidad.json", "config/mapping_mongo.json"]:
             err(f"{rel} tiene error JSON: {e}")
 
 
-# ── 4. Conexión PostgreSQL ────────────────────────────────────
+
 print("\n[5] Conexión a PostgreSQL")
 try:
     import psycopg2
@@ -94,13 +92,13 @@ try:
 
     cur = conn.cursor()
 
-    # Verificar base de datos
+   
     cur.execute("SELECT current_database(), version()")
     db, ver = cur.fetchone()
     ok(f"Base de datos: {db}")
     ok(f"Versión: {ver[:50]}")
 
-    # Tablas legacy
+    
     print("\n  Tablas legacy:")
     for tabla in ["Biblioteca_Data", "Prestamos_Crudos", "Inventario_Sedes", "Resenias_Usuarios"]:
         cur.execute(f"""
@@ -116,7 +114,7 @@ try:
         else:
             warn(f"{tabla}: no existe aún (se creará al correr main.py)")
 
-    # Tablas normalizadas
+   
     print("\n  Tablas normalizadas:")
     for tabla in ["Autores", "Libros", "Usuarios", "Prestamos", "AuditoriaLog"]:
         cur.execute(f"""
@@ -141,7 +139,7 @@ except Exception as e:
     warn(f"Para crear la BD: psql -U postgres -c \"CREATE DATABASE {os.getenv('PG_DATABASE','biblioteca_db')};\"")
 
 
-# ── 5. Conexión MongoDB ───────────────────────────────────────
+
 print("\n[6] Conexión a MongoDB")
 try:
     from pymongo import MongoClient
@@ -167,7 +165,7 @@ except Exception as e:
     warn("Verifica que MongoDB esté corriendo: mongod --dbpath /data/db")
 
 
-# ── Resumen ───────────────────────────────────────────────────
+
 print("\n" + "=" * 50)
 if errores_criticos == 0:
     print("\033[92m✔ Todo OK — puedes correr: python main.py\033[0m")
