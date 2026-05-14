@@ -8,6 +8,7 @@ CREATE TABLE Biblioteca_Data (
     editorial_info VARCHAR(255), 
     fecha_publicacion VARCHAR(50) -- Tipo de dato incorrecto 
 ); 
+
  
 CREATE TABLE Prestamos_Crudos ( 
     id_prestamo INT, 
