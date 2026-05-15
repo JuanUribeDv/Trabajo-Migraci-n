@@ -22,9 +22,6 @@ import psycopg2.extras
 from pymongo import MongoClient
 from faker import Faker
 
-# ─────────────────────────────────────────────────────────────
-# CONFIGURACIÓN
-# ─────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
@@ -48,9 +45,6 @@ def ruta(rel):
     return os.path.join(BASE_DIR, rel)
 
 
-# ─────────────────────────────────────────────────────────────
-# CONEXIONES
-# ─────────────────────────────────────────────────────────────
 def get_pg_conn():
     return psycopg2.connect(
         host=os.getenv("PG_HOST", "localhost"),
@@ -112,7 +106,7 @@ def fase_a_poblar_tablas_legacy(conn):
     categorias = ["Ciencias", "Historia", "Literatura", "Tecnologia", "Arte", "Filosofia"]
     estados    = ["activo", "devuelto", "vencido"]
     conteo     = {"Biblioteca_Data": 0, "Prestamos_Crudos": 0,
-                  "Inventario_Sedes": 0, "Resenias_Usuarios": 0}
+                  "Inventario_Sedes": 0, "Reseñas_Usuarios": 0}
 
     for i in range(250):
         try:
@@ -150,13 +144,13 @@ def fase_a_poblar_tablas_legacy(conn):
             conteo["Inventario_Sedes"] += 1
 
             cur.execute(
-                '''INSERT INTO "Resenias_Usuarios"
+                '''INSERT INTO "Reseñas_Usuarios"
                    (usuario_id, libro_titulo, comentario, calificacion)
                    VALUES (%s,%s,%s,%s)''',
                 (fake.random_int(1, 250), fake.catch_phrase()[:254],
                  fake.paragraph(nb_sentences=2), str(fake.random_int(1, 5))),
             )
-            conteo["Resenias_Usuarios"] += 1
+            conteo["Reseñas_Usuarios"] += 1
 
             if (i + 1) % 50 == 0:
                 conn.commit()
@@ -189,10 +183,9 @@ def fase_b_validar_calidad(conn):
     umbrales = config["umbrales_calidad"]
     reporte  = {}
 
-    # Alias para tablas con/sin tilde
     alias = {
-        "Reseñas_Usuarios": "Resenias_Usuarios",
-        "Resenias_Usuarios": "Resenias_Usuarios",
+        "Reseñas_Usuarios": "Reseñas_Usuarios",
+        "Resenias_Usuarios": "Reseñas_Usuarios",
     }
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -281,7 +274,7 @@ def fase_c_ejecutar_objetos_sql(conn):
     log.info("FASE C — Schema normalizado + SPs + Vista + Función + Cursor + Seed")
     log.info("=" * 60)
 
-    # C.1  Schema normalizado (DROP ALL + CREATE ALL — siempre limpio)
+    
     log.info("C.1 Aplicando schema normalizado (DROP + CREATE)...")
     if not ejecutar_sql_archivo(conn, "sql/Schema_normalizado.sql"):
         raise RuntimeError("Fallo en Schema_normalizado.sql")
@@ -301,7 +294,7 @@ def fase_c_ejecutar_objetos_sql(conn):
     libros_ids   = []
     usuarios_ids = []
     try:
-        # — Autores
+        
         for _ in range(20):
             cur.execute(
                 '''INSERT INTO "Autores" (nombre, nacionalidad, fecha_nacimiento)
@@ -607,7 +600,7 @@ def main():
         mongo_client.admin.command("ping")
         log.info(f"  ✔ MongoDB OK — BD: {os.getenv('MONGO_DATABASE')}\n")
 
-        # ── FLUJO COMPLETO ────────────────────────────────────
+       
         fase_0_crear_schema_legacy(conn_pg)          # crea tablas legacy
         poblamiento = fase_a_poblar_tablas_legacy(conn_pg)  # 250 registros sucios
         validacion  = fase_b_validar_calidad(conn_pg)       # valida y genera log
