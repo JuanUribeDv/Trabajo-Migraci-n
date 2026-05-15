@@ -31,7 +31,12 @@ Trabajo Migración/
 ### Raíz del Proyecto
 - **`main.py`**: Script principal que orquesta todo el proceso de migración en 4 fases secuenciales.
 - **`diagnostico.py`**: Utilidad para verificar dependencias, conexiones y archivos antes de ejecutar `main.py`.
-- **`requirements.txt`**: Lista de paquetes Python requeridos (psycopg2-binary, pymongo, faker, python-dotenv).
+- **`requirements.txt`**: Lista de paquetes Python requeridos para el proyecto:
+  - `psycopg2-binary`
+  - `pymongo`
+  - `faker`
+  - `python-dotenv`
+  - `jsonschema`
 - **`.env`**: Archivo de configuración con variables de entorno para conexiones a PostgreSQL y MongoDB.
 
 ### Carpeta `config/`
@@ -110,14 +115,35 @@ Los procedimientos almacenados implementan operaciones CRUD para cada entidad de
 
 ## Instalación y Configuración
 
-1. **Instalar dependencias**:
-   ```bash
-   pip install -r requirements.txt
+1. **Crear y activar el entorno virtual** (Windows PowerShell):
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
    ```
 
-2. **Configurar variables de entorno**:
-   Crear archivo `.env` con:
+   En Windows CMD:
+   ```cmd
+   python -m venv venv
+   .\venv\Scripts\activate.bat
    ```
+
+   En macOS/Linux:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+   > A partir de este momento, las siguientes instrucciones se deben ejecutar dentro del entorno virtual activado.
+
+2. **Actualizar pip e instalar dependencias**:
+   ```bash
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+   ```
+
+3. **Configurar variables de entorno**:
+   Crear archivo `.env` con:
+   ```env
    PG_HOST=localhost
    PG_PORT=5432
    PG_DATABASE=biblioteca_db
@@ -128,7 +154,7 @@ Los procedimientos almacenados implementan operaciones CRUD para cada entidad de
    MONGO_DATABASE=biblioteca_mongo
    ```
 
-3. **Verificar configuración**:
+4. **Verificar configuración antes de ejecutar**:
    ```bash
    python diagnostico.py
    ```
